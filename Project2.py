@@ -14,24 +14,28 @@ def get_titles_from_search_results(filename):
 
     [('Book title 1', 'Author 1'), ('Book title 2', 'Author 2')...]
     """
-    titles_lst = []
-    authors_lst = []
-    dir = os.path.dirname(__file__)
-    with open(os.path.join(dir, filename)) as f:
-        soup = BeautifulSoup(f, 'html.parser')
-        #can't figure this out
-        books = soup.find_all('td', )
-        titles = soup.find_all('a', class_ = 'bookTitle')
-        #authors = soup.find_all('a', class_ = 'authorName')
-        for title in titles:
-            title = title.text.strip()
-            author = 
-        
-        
-        #for author in authors:
-            #authors_lst.append(author.text.strip())
+    books = []
+    soup = BeautifulSoup(open('search_results.htm'), 'html.parser')
+    for book in soup.findAll('tr', itemtype = "http://scheme.org/Book"):
+        items = book.findAll('span', itemprop = 'name')
+        title = items[0].string.strip()
+        author = items[1].string.strip()
+        books.append(title, author)
 
-        return list(zip(titles_lst, authors_lst))
+    return books
+        # #can't figure this out
+        # books = soup.find_all('td', )
+        # titles = soup.find_all('a', class_ = 'bookTitle')
+        # #authors = soup.find_all('a', class_ = 'authorName')
+        # for title in titles:
+        #     title = title.text.strip()
+        #     author = 
+        
+        
+        # #for author in authors:
+        #     #authors_lst.append(author.text.strip())
+
+        # return list(zip(titles_lst, authors_lst))
 
 
 
@@ -95,7 +99,7 @@ def summarize_best_books(filepath):
     to your list of tuples.
     """
     summary = []
-    with open(os.path.join(filepath, "best_books.htm")) as f:
+    with open("best_books.htm") as f:
         soup = BeautifulSoup(f, "html.parser")
         books = soup.find_all('div', class_ = 'category clearFix')
         for i in books:
@@ -137,7 +141,7 @@ def write_csv(data, filename):
     for i in data:
         writer.writerow([i[0], i[1]])
     
-    write_file.close()
+    close(writeFile)
 
 
 def extra_credit(filepath):
@@ -217,7 +221,6 @@ class TestCases(unittest.TestCase):
 
         # check that we have the right number of best books (20)
         self.assertEqual(len(summary), 20)
-
         # assert each item in the list of best books is a tuple
         for i in summary:
             self.assertTrue(type(i) is tuple)
@@ -232,20 +235,21 @@ class TestCases(unittest.TestCase):
 
     def test_write_csv(self):
         # call get_titles_from_search_results on search_results.htm and save the result to a variable
-
+        search_results = get_titles_from_search_results('search_results.htm')
         # call write csv on the variable you saved and 'test.csv'
-
+        write_csv(search_results, 'test.csv')
         # read in the csv that you wrote (create a variable csv_lines - a list containing all the lines in the csv you just wrote to above)
-
+        f = open('test.csv')
+        csv_lines = f.readlines()
 
         # check that there are 21 lines in the csv
-
+        self.assertEqual(len(csv_lines), 21)
         # check that the header row is correct
-
+        self.assertEqual(csv_lines[0], 'Book title,Author Name')
         # check that the next row is 'Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling'
-
+        self.assertEqual(csv_lines[1], 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'J.K. Rowling')
         # check that the last row is 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'J.K. Rowling'
-        pass
+        self.assertEqual(csv_lines[-1], 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'J.K. Rowling')
 
 
 if __name__ == '__main__':
